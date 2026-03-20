@@ -1,86 +1,129 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { usersData, emptyAddress } from "@/data/usersData";
-
+import React, { createContext, useContext, useState, useEffect } from "react";
+import * as api from "../services/api"; // adjust path
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
-  const [users, setUsers] = useState([...usersData]);
-  const [currentUser, setCurrentUser] = useState(() => {
-    const savedId = localStorage.getItem("kk_user_id");
-    if (savedId) return usersData.find(u => u.id === savedId) || null;
-    return null;
-  });
+	const [currentUser, setCurrentUser] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
 
-  const role = currentUser?.role || null;
-  const userName = currentUser?.name || "";
-  const userId = currentUser?.id || "";
-  const userEmail = currentUser?.email || "";
-  const userAddress = currentUser?.address || emptyAddress;
-  const userPhone = currentUser?.phone || "";
-  const userPhoto = currentUser?.photo || "";
+	// On mount, try to restore user from token
+	useEffect(() => {
+		const loadUser = async () => {
+			const token = localStorage.getItem("kk_token");
+			if (!token) {
+				setLoading(false);
+				return;
+			}
+			try {
+				const { data:profileData } = await api.getProfile();
+				setCurrentUser(profileData.user);
+			} catch (err) {
+				console.error("Failed to load user", err);
+				localStorage.removeItem("kk_token");
+			} finally {
+				setLoading(false);
+			}
+		};
+		loadUser();
+	}, []);
 
-  const setRole = (r) => {
-    if (!r) {
-      setCurrentUser(null);
-      localStorage.removeItem("kk_user_id");
-    }
-  };
+	const login = async (email, password, role) => {
+		setError(null);
+		try {
+			const { data } = await api.login({ email, password, role }); 
+			localStorage.setItem("kk_token", data.token);
+			const { data: profileData } = await api.getProfile();
+			setCurrentUser(profileData.user);
+			console.log("Login successful, user profile loaded:", profileData);
+			return { success: true };
+		} catch (err) {
+			const message = err.response?.data?.message || "Login failed";
+			setError(message);
+			return { success: false, error: message };
+		}
+	};
 
-  const login = (email, password, selectedRole) => {
-    const user = users.find(u => u.email === email && u.password === password && u.role === selectedRole);
-    if (!user) return { success: false, error: "Invalid credentials or role mismatch" };
-    setCurrentUser(user);
-    localStorage.setItem("kk_user_id", user.id);
-    return { success: true };
-  };
+	const register = async (name, email, password, role, address, phone) => {
+		setError(null);
+		try {
+			const { data } = await api.signup({
+				name,
+				email,
+				password,
+				role,
+				address,
+				phone,
+			});
+			localStorage.setItem("kk_token", data.token);
+			const { data: profileData } = await api.getProfile();
+			setCurrentUser(profileData.user);
+			return { success: true };
+		} catch (err) {
+			const message =
+				err.response?.data?.message || "Registration failed something went wrong";
+			setError(message);
+			return { success: false, error: message };
+		}
+	};
 
-  const register = (name, email, password, role, address, phone) => {
-    if (users.find(u => u.email === email)) {
-      return { success: false, error: "Email already registered" };
-    }
-    const id = role === "farmer" ? `f${Date.now()}` : `bu${Date.now()}`;
-    const newUser = { id, name, email, password, role, address, phone, joinedAt: new Date().toISOString().split("T")[0], photo: "" };
-    setUsers(prev => [...prev, newUser]);
-    setCurrentUser(newUser);
-    localStorage.setItem("kk_user_id", newUser.id);
-    return { success: true };
-  };
+	const updateProfile = async (profileData) => {
+		setError(null);
+		try {
+			const { data } = await api.updateProfile(profileData);
+			setCurrentUser((prev) => ({ ...prev, ...data.user }));
+			return { success: true }; 
+		} catch (err) {
+			const message = err.response?.data?.message || "Update failed";
+			setError(message);
+			return { success: false, error: message };
+		}
+	};
 
-  const updateProfile = (data) => {
-    if (!currentUser) return;
-    const updated = { ...currentUser, ...data };
-    setCurrentUser(updated);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updated : u));
-  };
+	const changePassword = async (oldPassword, newPassword) => {
+		setError(null);
+		try {
+			await api.changePassword({ oldPassword, newPassword });
+			return { success: true };
+		} catch (err) {
+			console.log("Password change error:", err.response?.data?.message);
+			const message = err.response?.data?.message || "Password change failed";
+			setError(message);
+			return { success: false, error: message };
+		}
+	};
 
-  const changePassword = (oldPw, newPw) => {
-    if (!currentUser) return { success: false, error: "Not logged in" };
-    if (currentUser.password !== oldPw) return { success: false, error: "Current password is incorrect" };
-    if (newPw.length < 6) return { success: false, error: "New password must be at least 6 characters" };
-    const updated = { ...currentUser, password: newPw };
-    setCurrentUser(updated);
-    setUsers(prev => prev.map(u => u.id === currentUser.id ? updated : u));
-    return { success: true };
-  };
+	const logout = () => {
+		localStorage.removeItem("kk_token");
+		setCurrentUser(null);
+	};
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem("kk_user_id");
-  };
+	const value = {
+		currentUser,
+		loading,
+		error,
+		login,
+		register,
+		updateProfile,
+		changePassword,
+		logout,
+		role: currentUser?.role,
+		userName: currentUser?.name,
+		userId: currentUser?._id,
+		userEmail: currentUser?.email,
+		userAddress: currentUser?.address,
+		userPhone: currentUser?.phone,
+		userPhoto: currentUser?.photo,
+	};
 
-  return (
-    <AuthContext.Provider value={{
-      role, userName, userId, userEmail, userAddress, userPhone, userPhoto, currentUser,
-      setRole, login, register, updateProfile, changePassword, logout, allUsers: users,
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	return (
+		<AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+	);
 };
 
 export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+	const ctx = useContext(AuthContext);
+	if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+	return ctx;
 };

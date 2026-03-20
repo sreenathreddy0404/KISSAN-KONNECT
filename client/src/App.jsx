@@ -29,9 +29,15 @@ import NotFound from "./pages/NotFound";
 // const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const { role } = useAuth();
-  if (!role) return <Navigate to="/login" />;
-  if (role !== allowedRole) return <Navigate to={`/${role}`} />;
+  const { role, loading } = useAuth();
+
+  if (loading) {
+    // Wait for auth status to resolve, avoid redirect flicker on refresh
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!role) return <Navigate to="/login" replace />;
+  if (role !== allowedRole) return <Navigate to={`/${role}`} replace />;
   return <DashboardLayout>{children}</DashboardLayout>;
 };
 

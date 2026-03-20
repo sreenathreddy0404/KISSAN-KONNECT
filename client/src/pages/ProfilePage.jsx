@@ -68,10 +68,11 @@ const ProfilePage = () => {
     toast.success("Profile updated! ✅");
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!oldPw || !newPw) { toast.error("Fill all password fields"); return; }
     if (newPw !== confirmPw) { toast.error("Passwords don't match"); return; }
-    const result = changePassword(oldPw, newPw);
+
+    const result = await changePassword(oldPw, newPw);
     if (result.success) {
       toast.success("Password changed! 🔒");
       setOldPw(""); setNewPw(""); setConfirmPw("");

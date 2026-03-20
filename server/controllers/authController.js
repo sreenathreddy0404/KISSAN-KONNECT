@@ -22,7 +22,7 @@ const signup = async (req, res) => {
   // Check if user exists
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+    return res.status(400).json({ success: false, message: 'User already exists' });
   }
 
   // Create user (address is optional)
@@ -36,19 +36,9 @@ const signup = async (req, res) => {
   });
 
   if (user) {
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      address: user.address,
-      photo: user.photo,
-      joinedAt: user.joinedAt,
-      token: generateToken(user._id)
-    });
+    res.status(201).json({success: true, token: generateToken(user._id)});
   } else {
-    res.status(400).json({ message: 'Invalid user data' });
+    res.status(400).json({ success: false, message: 'Invalid user data' });
   }
 };
 
@@ -64,32 +54,86 @@ const login = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (user && (await user.matchPassword(password)) && user.role === role) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      address: user.address,
-      photo: user.photo,
-      joinedAt: user.joinedAt,
-      token: generateToken(user._id)
-    });
+    res.json({success: true, token: generateToken(user._id)});
   } else {
-    res.status(401).json({ message: 'Invalid email or password' });
+    res.status(401).json({ success: false, message: 'Invalid email or password' });
   }
 };
 
 // @desc    Get current user profile
-// @route   GET /api/auth/me
+// @route   GET /api/auth/profile
 // @access  Private
 const getMe = async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   if (user) {
-    res.json(user);
+    res.json({ success: true, user });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404).json({ success: false, message: 'User not found' });
   }
 };
 
-module.exports = { signup, login, getMe };
+// @desc    Change password
+// @route   POST /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Old and new password required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const isMatch = await user.matchPassword(oldPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Old password is incorrect' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const { name, phone, address, photo } = req.body;
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (address) user.address = { ...user.address, ...address };
+    if (photo) user.photo = photo;
+
+    const updatedUser = await user.save();
+
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      phone: updatedUser.phone,
+      address: updatedUser.address,
+      photo: updatedUser.photo
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+module.exports = { signup, login, getMe, changePassword, updateProfile };

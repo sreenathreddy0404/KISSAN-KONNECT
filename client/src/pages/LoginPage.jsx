@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -10,11 +10,18 @@ import  toast  from "react-hot-toast";
 import heroImg from "@/assets/hero-farm.jpg";
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, role, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && role) {
+      navigate(role === "farmer" ? "/farmer" : role === "buyer" ? "/buyer" : "/admin", { replace: true });
+    }
+  }, [authLoading, role, navigate]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("buyer");
+  const [loginRole, setLoginRole] = useState("buyer");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -22,13 +29,11 @@ const LoginPage = () => {
     e.preventDefault();
     if (!email || !password) { toast.error("Please fill all fields"); return; }
     setLoading(true);
-    // Simulate network delay
-    await new Promise(r => setTimeout(r, 800));
-    const result = login(email, password, role);
+    const result = await login(email, password, loginRole);
     setLoading(false);
     if (result.success) {
       toast.success("Login successful! Welcome back 🌾");
-      navigate(role === "farmer" ? "/farmer" : role === "buyer" ? "/buyer" : "/admin");
+      navigate(loginRole === "farmer" ? "/farmer" : loginRole === "buyer" ? "/buyer" : "/admin");
     } else {
       toast.error(result.error || "Login failed");
     }
@@ -74,9 +79,9 @@ const LoginPage = () => {
                   <button
                     type="button"
                     key={r}
-                    onClick={() => setRole(r)}
+                    onClick={() => setLoginRole(r)}
                     className={`flex-1 py-2.5 rounded-lg border text-sm font-medium capitalize transition-all ${
-                      role === r
+                      loginRole === r
                         ? "gradient-hero text-primary-foreground border-transparent"
                         : "border-border text-muted-foreground hover:border-primary hover:text-foreground bg-card"
                     }`}
@@ -116,7 +121,7 @@ const LoginPage = () => {
                   size="sm"
                   className="flex-1 text-xs"
                   disabled={loading}
-                  onClick={() => { setEmail(demo.email); setPassword(demo.pw); setRole(demo.r); }}
+                  onClick={() => { setEmail(demo.email); setPassword(demo.pw); setLoginRole(demo.r); }}
                 >
                   {demo.label}
                 </Button>
