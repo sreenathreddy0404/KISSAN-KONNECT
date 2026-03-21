@@ -8,16 +8,27 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Scale, User, ArrowLeft, Handshake, CreditCard, Calendar } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import  toast  from "react-hot-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getCrop } from "@/services/api";
 
 const CropDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { crops, createOrder, getCropAvgRating, getCropRatings } = useAppStore();
   const { userId, userName } = useAuth();
-  const crop = crops.find(c => c.id === id);
+  const [crop, setCrop] = useState(null);
+
+  useEffect(()=> {
+    const fetchCrop = async () => {
+      const { data } = await getCrop(id);
+      console.log("Fetched crop:", data);
+      setCrop(data);
+    };
+    fetchCrop();
+  }, [id]);
+
   const avgRating = crop ? getCropAvgRating(crop.id) : 0;
   const ratingCount = crop ? getCropRatings(crop.id).length : 0;
 

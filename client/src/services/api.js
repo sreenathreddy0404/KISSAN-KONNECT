@@ -45,8 +45,9 @@ export const updateProfile = (data) => API.put('/auth/profile', data);
 export const changePassword = ({oldPassword, newPassword}) => API.put('/auth/change-password', { oldPassword, newPassword });
 
 // Crops
-export const getCrops = (params) => API.get('/crops', { params });
-export const getCrop = (id) => API.get(`/crops/${id}`);
+export const getCrops = (params) => API.get('/crops/', { params });
+export const getMyCrops = () => API.get('/crops/my-crops');
+export const getCrop = (id) => API.get(`/crops/one/${id}`);
 export const createCrop = (formData) => API.post('/crops', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });

@@ -44,28 +44,56 @@ const createCrop = async (req, res) => {
 // @access  Public
 const getAllCrops = async (req, res) => {
   try {
-    const { page = 1, limit = 10, category, search } = req.query;
+    const { page = 1, limit = 10, category, search, priceMin, priceMax, sort } = req.query;
+    const pageNum = parseInt(page, 10) || 1;
+    const lim = parseInt(limit, 10) || 10;
     const query = { status: 'active' };
 
     if (category) query.category = category;
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { description: { $regex: search, $options: 'i' } },
+        { farmerName: { $regex: search, $options: 'i' } }
       ];
+    }
+    if (priceMin !== undefined || priceMax !== undefined) {
+      query.pricePerKg = {};
+      if (priceMin !== undefined) query.pricePerKg.$gte = parseFloat(priceMin);
+      if (priceMax !== undefined) query.pricePerKg.$lte = parseFloat(priceMax);
+    }
+
+    let sortOption = { createdAt: -1 }; // default sort
+    if (sort) {
+      switch (sort) {
+        case 'price-low':
+          sortOption = { pricePerKg: 1 };
+          break;
+        case 'price-high':
+          sortOption = { pricePerKg: -1 };
+          break;
+        case 'qty-high':
+          sortOption = { availableQuantityKg: -1 };
+          break;
+        case 'newest':
+          sortOption = { createdAt: -1 };
+          break;
+        default:
+          sortOption = { createdAt: -1 };
+      }
     }
 
     const crops = await Crop.find(query)
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .sort({ createdAt: -1 });
+      .limit(lim)
+      .skip((pageNum - 1) * lim)
+      .sort(sortOption);
 
     const total = await Crop.countDocuments(query);
 
     res.json({
       crops,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      totalPages: Math.ceil(total / lim),
+      currentPage: pageNum,
       total
     });
   } catch (error) {

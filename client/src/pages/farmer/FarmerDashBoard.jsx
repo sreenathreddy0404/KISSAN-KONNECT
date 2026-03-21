@@ -1,16 +1,37 @@
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/stores/AppStore";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { Wheat, ShoppingBag, MessageSquare, IndianRupee } from "lucide-react";
 import CropCard from "@/components/CropCard";
 import { useNavigate } from "react-router-dom";
+import { getMyCrops } from "@/services/api";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import toast from "react-hot-toast";
+
 
 const FarmerDashboard = () => {
   const navigate = useNavigate();
   const { userId, userName } = useAuth();
-  const { crops, orders, bargains } = useAppStore();
+  const { orders, bargains } = useAppStore();
+  const [myCrops, setMyCrops] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const myCrops = crops.filter(c => c.farmerId === userId);
+   useEffect(() => {
+    const fetchCrops = async () => {
+      try {
+        const res = await getMyCrops();
+        setMyCrops(res.data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load your crops. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCrops();
+  }, []);
+
   const myOrders = orders.filter(o => o.farmerId === userId);
   const myBargains = bargains.filter(b => b.farmerId === userId && b.status === "active");
   const revenue = myOrders.reduce((sum, o) => sum + o.totalPrice, 0);
@@ -21,6 +42,10 @@ const FarmerDashboard = () => {
     { label: "Active Bargains", value: String(myBargains.length), icon: MessageSquare, color: "gradient-hero" },
     { label: "Revenue", value: `₹${revenue.toLocaleString()}`, icon: IndianRupee, color: "gradient-golden" },
   ];
+
+  if (loading) {
+		return <LoadingSpinner size="lg" text="Loading your dashboard..."/>;
+  }
 
   return (
     <div className="space-y-8">
