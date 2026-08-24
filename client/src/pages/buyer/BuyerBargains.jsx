@@ -59,6 +59,9 @@ const BuyerBargains = () => {
 
   const handleAccepted = useCallback(() => {
     loadBargains();
+    // Reset UI: close chat and clear selection after a deal is accepted
+    setSelected(null);
+    setShowChat(false);
   }, [loadBargains]);
 
   const handleSelect = (id) => { setSelected(id); if (isMobile) setShowChat(true); };
