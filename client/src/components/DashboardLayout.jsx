@@ -6,7 +6,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
-import { Sprout, LayoutDashboard, Wheat, ShoppingBag, MessageSquare, LogOut, Store, Package, Users, BarChart3, Settings } from "lucide-react";
+import { Sprout, LayoutDashboard, Wheat, ShoppingBag, MessageSquare, LogOut, Store, Package, Users, BarChart3, Settings, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -15,6 +15,7 @@ const farmerLinks = [
   { title: "My Crops", url: "/farmer/crops", icon: Wheat },
   { title: "Orders", url: "/farmer/orders", icon: ShoppingBag },
   { title: "Bargains", url: "/farmer/bargains", icon: MessageSquare },
+  { title: "AI Intelligence", url: "/farmer/ai-intelligence", icon: Sparkles },
   { title: "Profile", url: "/farmer/profile", icon: Settings },
 ];
 
@@ -22,6 +23,7 @@ const buyerLinks = [
   { title: "Browse Crops", url: "/buyer", icon: Store },
   { title: "My Orders", url: "/buyer/orders", icon: Package },
   { title: "Bargains", url: "/buyer/bargains", icon: MessageSquare },
+  { title: "AI Intelligence", url: "/buyer/ai-intelligence", icon: Sparkles },
   { title: "Profile", url: "/buyer/profile", icon: Settings },
 ];
 
@@ -31,6 +33,7 @@ const adminLinks = [
   { title: "Buyers", url: "/admin/buyers", icon: Users },
   { title: "Orders", url: "/admin/orders", icon: Package },
   { title: "Revenue", url: "/admin/revenue", icon: BarChart3 },
+  { title: "AI Intelligence", url: "/admin/ai-intelligence", icon: Sparkles },
 ];
 
 const DashboardLayout = ({ children }) => {

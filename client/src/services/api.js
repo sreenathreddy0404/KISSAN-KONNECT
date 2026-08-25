@@ -87,3 +87,9 @@ export const getAdminUsers    = (role) => API.get('/admin/users', { params: { ro
 export const getAdminOrders   = () => API.get('/admin/orders');
 export const getAdminRevenue  = () => API.get('/admin/revenue');
 export const getAdminBargains = () => API.get('/admin/bargains');
+
+// ── AI Intelligence ───────────────────────────────────────
+export const getAIStates      = () => API.get('/ai/states');
+export const getAIDistricts   = (state) => API.get('/ai/districts', { params: { state } });
+export const getAICommodities = () => API.get('/ai/commodities');
+export const predictPriceBackend = (data) => API.post('/ai/predict', data);

@@ -23,6 +23,7 @@ import AdminBuyers from "./pages/admin/AdminBuyers";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminRevenue from "./pages/admin/AdminRevenue";
 import ProfilePage from "./pages/ProfilePage";
+import AIIntelligence from "./pages/AIIntelligence";
 import NotFound from "./pages/NotFound";
 
 
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/farmer/crops" element={<ProtectedRoute allowedRole="farmer"><FarmerCrops /></ProtectedRoute>} />
               <Route path="/farmer/orders" element={<ProtectedRoute allowedRole="farmer"><FarmerOrders /></ProtectedRoute>} />
               <Route path="/farmer/bargains" element={<ProtectedRoute allowedRole="farmer"><FarmerBargains /></ProtectedRoute>} />
+              <Route path="/farmer/ai-intelligence" element={<ProtectedRoute allowedRole="farmer"><AIIntelligence /></ProtectedRoute>} />
               <Route path="/farmer/profile" element={<ProtectedRoute allowedRole="farmer"><ProfilePage /></ProtectedRoute>} />
 
               {/* Buyer */}
@@ -67,6 +69,7 @@ const App = () => (
               <Route path="/buyer/crop/:id" element={<ProtectedRoute allowedRole="buyer"><CropDetail /></ProtectedRoute>} />
               <Route path="/buyer/orders" element={<ProtectedRoute allowedRole="buyer"><BuyerOrders /></ProtectedRoute>} />
               <Route path="/buyer/bargains" element={<ProtectedRoute allowedRole="buyer"><BuyerBargains /></ProtectedRoute>} />
+              <Route path="/buyer/ai-intelligence" element={<ProtectedRoute allowedRole="buyer"><AIIntelligence /></ProtectedRoute>} />
               <Route path="/buyer/profile" element={<ProtectedRoute allowedRole="buyer"><ProfilePage /></ProtectedRoute>} />
 
               {/* Admin */}
@@ -75,6 +78,7 @@ const App = () => (
               <Route path="/admin/buyers" element={<ProtectedRoute allowedRole="admin"><AdminBuyers /></ProtectedRoute>} />
               <Route path="/admin/orders" element={<ProtectedRoute allowedRole="admin"><AdminOrders /></ProtectedRoute>} />
               <Route path="/admin/revenue" element={<ProtectedRoute allowedRole="admin"><AdminRevenue /></ProtectedRoute>} />
+              <Route path="/admin/ai-intelligence" element={<ProtectedRoute allowedRole="admin"><AIIntelligence /></ProtectedRoute>} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
