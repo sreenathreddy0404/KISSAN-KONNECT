@@ -93,3 +93,15 @@ export const getAIStates      = () => API.get('/ai/states');
 export const getAIDistricts   = (state) => API.get('/ai/districts', { params: { state } });
 export const getAICommodities = () => API.get('/ai/commodities');
 export const predictPriceBackend = (data) => API.post('/ai/predict', data);
+
+// ── AI Recommendations — Model 1 (Buyer Recommendation for Farmers) ──────────
+export const getRecM1Crops  = ()      => API.get('/ai/recommend/m1/crops');
+export const getRecM1States = ()      => API.get('/ai/recommend/m1/states');
+export const getRecM1Cities = (state) => API.get(`/ai/recommend/m1/cities/${encodeURIComponent(state)}`);
+export const getBuyerRecs   = (data)  => API.post('/ai/recommend/m1', data);
+
+// ── AI Recommendations — Model 2 (Farmer Recommendation for Buyers) ──────────
+export const getRecM2Crops  = ()       => API.get('/ai/recommend/m2/crops');
+export const getRecM2States = ()       => API.get('/ai/recommend/m2/states');
+export const getRecM2Cities = (state)  => API.get(`/ai/recommend/m2/cities/${encodeURIComponent(state)}`);
+export const getFarmerRecs  = (params) => API.get('/ai/recommend/m2', { params });

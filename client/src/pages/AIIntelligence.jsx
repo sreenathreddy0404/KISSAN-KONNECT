@@ -11,7 +11,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +22,10 @@ import {
   fetchCommodities,
   predictCropPrice
 } from "@/services/aiService";
+import Recommendations from "@/components/recommendations/Recommendations";
 
 const AIIntelligence = () => {
-  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "prediction"
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "prediction" | "recommendation"
   
   // Data lists from backend
   const [states, setStates] = useState([]);
@@ -176,7 +178,7 @@ const AIIntelligence = () => {
           </p>
         </div>
 
-        {activeTab === "prediction" && (
+        {(activeTab === "prediction" || activeTab === "recommendation") && (
           <Button
             variant="outline"
             onClick={() => setActiveTab("overview")}
@@ -224,36 +226,36 @@ const AIIntelligence = () => {
             </div>
           </div>
 
-          {/* Card 2: Recommendations (Placeholder) */}
-          <div className="rounded-2xl border border-border bg-card/70 backdrop-blur-sm p-6 shadow-card flex flex-col justify-between relative overflow-hidden opacity-90">
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/15 text-secondary-foreground border border-secondary/30">
-                <Sparkles className="w-3.5 h-3.5 text-secondary" /> Coming Soon
-              </span>
-            </div>
+          {/* Card 2: Recommendations */}
+          <div className="group rounded-2xl border border-border bg-card p-6 shadow-card hover:shadow-elevated transition-all duration-300 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/10 rounded-bl-full transition-transform group-hover:scale-110 duration-500 pointer-events-none" />
             <div>
               <div className="w-14 h-14 rounded-2xl gradient-golden flex items-center justify-center mb-5 text-secondary-foreground shadow-md">
-                <Sparkles className="w-7 h-7" />
+                <Users className="w-7 h-7" />
               </div>
-              <h2 className="text-2xl font-display font-bold text-card-foreground mb-2">
-                Recommendations
-              </h2>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-2xl font-display font-bold text-card-foreground">
+                  Recommendations
+                </h2>
+                <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20 text-xs">
+                  AI Model
+                </Badge>
+              </div>
               <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-                Get intelligent recommendations for farmers and buyers based on market conditions and agricultural insights.
+                Get intelligent recommendations for farmers and buyers based on crop type, location, and market conditions using our AI recommendation models.
               </p>
             </div>
             <div>
               <Button
-                disabled
-                variant="outline"
-                className="w-full gap-2 h-11 text-base cursor-not-allowed opacity-60 bg-muted/50"
+                onClick={() => setActiveTab("recommendation")}
+                className="w-full gradient-golden text-secondary-foreground border-0 gap-2 h-11 text-base font-medium shadow-sm hover:opacity-95 transition-opacity"
               >
-                Feature Coming Soon
+                Open Recommendations <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </motion.div>
-      ) : (
+      ) : activeTab === "prediction" ? (
         /* Price Prediction Interface View */
         <motion.div
           initial={{ opacity: 0, y: 15 }}
@@ -468,6 +470,15 @@ const AIIntelligence = () => {
               </div>
             </motion.div>
           )}
+        </motion.div>
+      ) : (
+        /* Recommendations View */
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Recommendations />
         </motion.div>
       )}
     </div>
