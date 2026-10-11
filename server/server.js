@@ -1,5 +1,15 @@
 const dotenv  = require('dotenv');
 dotenv.config();
+
+// ── Validate required environment variables on startup ──
+const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET', 'CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET', 'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET'];
+REQUIRED_ENV.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
 const express = require('express');
 const cors    = require('cors');
 const http    = require('http');
