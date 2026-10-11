@@ -9,7 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardLayout from "./components/DashboardLayout";
-import FarmerDashboard from "./pages/farmer/FarmerDashboard";
+import FarmerDashboard from "./pages/farmer/FarmerDashBoard";
 import FarmerCrops from "./pages/farmer/FarmerCrops";
 import FarmerOrders from "./pages/farmer/FarmerOrders";
 import FarmerBargains from "./pages/farmer/FarmerBargains";
