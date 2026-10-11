@@ -32,8 +32,9 @@ const app    = express();
 const server = http.createServer(app);
 
 // ── CORS — must be configured BEFORE socket handler and routes ──
+const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, ''); // strip trailing slash
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'http://localhost:5173', // Vite dev server
+  origin: clientUrl,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,

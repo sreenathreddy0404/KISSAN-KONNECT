@@ -7,7 +7,7 @@ const { setIo: setOrderIo } = require('./controllers/orderController');
 const socketHandler = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, ''),
       methods: ['GET', 'POST'],
       credentials: true,
     },
